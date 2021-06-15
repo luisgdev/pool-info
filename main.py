@@ -1,4 +1,5 @@
 from web3 import Web3
+import crypto_v1 as crypto
 import res
 
 
@@ -19,5 +20,9 @@ pending = contract_info.functions.pendingCake(0, wallet).call()
 staked_balance = web3.fromWei(staked, 'ether')
 pending_balance = web3.fromWei(pending, 'ether')
 
-print(f'Staked: {round(staked_balance, 4)} CAKE')
-print(f'Earned: {round(pending_balance, 4)} CAKE')
+cake_usd = crypto.get_price('pancakeswap-token', 'usd')
+staked_usd = float(staked_balance) * cake_usd
+pending_usd = float(pending_balance) * cake_usd
+
+print(f'Staked: {round(staked_balance, 4)} CAKE ($ {round(staked_usd, 4)})')
+print(f'Earned: {round(pending_balance, 6)} CAKE ($ {round(pending_usd, 6)})')
