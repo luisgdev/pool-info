@@ -72,6 +72,11 @@ def view_stake():
         str(round(pending_balance, 6)), 
         str(round(pending_usd, 6)), 
         str(round(pending_bnb, 6)))
+    table.add_row(
+        'Price', 
+        str('1'), 
+        str(round(cake_usd, 6)), 
+        str(round(cake_bnb, 6)))
 
     # Mostramos en consola
     console = Console()
