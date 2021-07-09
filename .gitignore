@@ -130,3 +130,5 @@ dmypy.json
 
 # Custom
 res.py
+# Virualenv
+poolinfo_calc/
