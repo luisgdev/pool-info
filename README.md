@@ -3,7 +3,11 @@
 This console application can show your staked and pending balances you have on PancakeSwap Staking pool (Binance Smart Chain).
 
 I made it to query Manual Cake pool. 
-You can query other pools by modifying `contract` and `contract_abi`.
+You can query other pools by modifying `pid`, `contract` and `contract_abi`.
+
+Tested on:
+- [PancakeSwap Manual Cake pool](https://bscscan.com/address/0x73feaa1eE314F8c655E354234017bE2193C9E24E#code)
+- [MDEX Boardroom MDX pool](https://bscscan.com/address/0x6aEE12e5Eb987B3bE1BA8e621BE7C4804925bA68#code)
 
 The GUI looks nice thanks to [Rich](https://github.com/willmcgugan/rich). 
 
