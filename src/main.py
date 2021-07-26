@@ -2,101 +2,93 @@ import time
 
 from web3 import Web3
 from rich import box
-from rich import console
 from rich.table import Table
 from rich.console import Console
 
-import crypto_v1 as crypto
-import contracts
+import market
+import pools
 
 
-def calc_apr(min, token):
-    wallet = contracts.data[token]['my_wallet']
-    init_balance = float(check_pool(wallet, token)['pending'])
-    print(f'{time.strftime("%H:%M:%S")} -> {init_balance} tokens')
-    time.sleep(min * 60)
-    last_check = check_pool(wallet, token)
-    final_balance = float(last_check['pending'])
-    staked = float(last_check['staked'])
-    print(f'{time.strftime("%H:%M:%S")} -> {final_balance} tokens')
-    # Calc APR
-    yih = (final_balance - init_balance) * (60/min)
-    yihp = (yih / staked) * 100
-    apr = yihp * 24 * 365
-    return apr
+class StakePool:
 
+    def __init__(self, data):
+        self._pid = data['_pid']
+        self.token_name = data['token_name']
+        self.token_id = data['token_id']
+        self.pool_name = data['pool_name']
+        self.my_wallet = data['my_wallet']
+        self.mainnet = data['mainnet']
+        self.contract = data['contract']
+        self.contract_abi = data['contract_abi']
 
-def check_pool(wallet, token):
-    bsc_mainnet = "https://bsc-dataseed3.binance.org/"
-    web3 = Web3(Web3.HTTPProvider(bsc_mainnet))
-    #print(f'Connected to Web3: {web3.isConnected()}')
-    # Pool Data
-    _pid = contracts.data[token]['_pid']
-    contract = contracts.data[token]['contract']
-    contract_abi = contracts.data[token]['contract_abi']
-    contract_info = web3.eth.contract(contract, abi=contract_abi)
-    # Call contract functions to get info
-    wallet = web3.toChecksumAddress(contracts.data[token]['my_wallet'])
-    staked = contract_info.functions.userInfo(_pid, wallet).call()[0]
-    if token.lower() == 'cake':
-        pending = contract_info.functions.pendingCake(_pid, wallet).call()
-    else:
-        pending = contract_info.functions.pending(_pid, wallet).call()
+    def _check(self):
+        web3 = Web3(Web3.HTTPProvider(self.mainnet))
+        print(f'Connected to Web3: {web3.isConnected()}')
+        wallet = web3.toChecksumAddress(self.my_wallet)
+        pool = web3.eth.contract(self.contract, abi=self.contract_abi)
+        # Call contract functions to get pool info
+        staked = pool.functions.userInfo(self._pid, wallet).call()[0]
+        if self.token_name.lower() == 'cake':
+            pending = pool.functions.pendingCake(self._pid, wallet).call()
+        else:
+            pending = pool.functions.pending(self._pid, wallet).call()
+        # Convert to readable number
+        staked = float(web3.fromWei(staked, 'ether'))
+        pending = float(web3.fromWei(pending, 'ether'))
+        return staked, pending
 
-    result = {
-        'staked': web3.fromWei(staked, 'ether'),
-        'pending': web3.fromWei(pending, 'ether')
-    }
-    return result
+    def calc_apr(self, t_min=1):
+        init_pending = self._check()[1]
+        print(f'{time.strftime("%H:%M:%S")} -> {init_pending} tokens')
+        time.sleep(t_min * 60)
+        final_staked, final_pending = self._check()
+        print(f'{time.strftime("%H:%M:%S")} -> {final_pending} tokens')
+        # Calc yield per hour and apr%
+        yield_per_h = (final_pending - init_pending) * (60 / t_min)
+        apr_p = (yield_per_h / final_staked) * 24 * 365 * 100
+        return apr_p
 
-
-def view_stake(token):
-    balances = check_pool(contracts.data[token]['my_wallet'], token)
-    staked_balance = balances['staked']
-    pending_balance = balances['pending']
-    # Get current prices to calc value
-    price = crypto.get_price(contracts.data[token]['token_id'], 'usd,bnb')
-    token_usd = price['usd']
-    staked_usd = float(staked_balance) * token_usd
-    pending_usd = float(pending_balance) * token_usd
-    token_bnb = price['bnb']
-    staked_bnb = float(staked_balance) * token_bnb
-    pending_bnb = float(pending_balance) * token_bnb
-    # Create table ...
-    table = Table(title=f'{contracts.data[token]["pool_name"]}', box=box.SIMPLE)
-    header = ['Balance', token.upper(), 'USD Value', 'BNB Value']
-    for item in header:
-        table.add_column(item)
-    table.add_row(
-        'Staked', 
-        str(round(staked_balance, 4)), 
-        str(round(staked_usd, 4)), 
-        str(round(staked_bnb, 6)))
-    table.add_row(
-        'Pending', 
-        str(round(pending_balance, 6)), 
-        str(round(pending_usd, 6)), 
-        str(round(pending_bnb, 6)))
-    table.add_row(
-        'Price', 
-        str('1'), 
-        str(round(token_usd, 6)), 
-        str(round(token_bnb, 6)))
-    console = Console()
-    console.print(table)
+    def print_view(self, pairs='usd,bnb,btc'):
+        # Get pool info
+        staked_balance, pending_balance = self._check()
+        # Get market price
+        price = market.get_price(self.token_id, pairs)
+        # Generate rows
+        rows = [
+            {
+                'name': self.token_name,
+                'price': '1',
+                'staked': str(round(staked_balance, 6)),
+                'pending': str(round(pending_balance, 6))
+            }
+        ]
+        if pairs:
+            for pair in pairs.split(','):
+                rows.append(
+                    dict(
+                        name=pair.upper(),
+                        price=str(round(price[pair], 6)),
+                        staked=str(round(staked_balance * price[pair], 6)),
+                        pending=str(round(pending_balance * price[pair], 6))
+                    )
+                )
+        # Create table
+        table = Table(title=self.pool_name, box=box.SIMPLE)
+        header = ['Value', self.token_name, 'Staked', 'Pending']
+        for item in header:
+            table.add_column(item)
+        for r in rows:
+            table.add_row(r['name'], r['price'], r['staked'], r['pending'])
+        # Print table
+        console = Console()
+        console.print(table)
 
 
 if __name__ == '__main__':
-    my_pools = ['cake', 'mdx']
-    init_time = time.perf_counter()
-    for item in my_pools:
-        view_stake(item)
-    elapsed_time = round(time.perf_counter() - init_time, 2)
-    print(f' *** Elapsed Time: {elapsed_time} s ***\n')
+    my_stake = StakePool(pools.data['cake'])
+    my_stake.print_view(pairs='usd,bnb')
     console = Console()
     with console.status('it will take a minute') as status:
         print('Calculating APR...')
-        for item in my_pools:
-            apr = calc_apr(min=1, token=item)
-            Console().print(f'\n {item.upper()} APR = {round(apr, 2)}%', style="bold green")
-        
+        apr = my_stake.calc_apr()
+        Console().print(f'\nAPR = {round(apr, 2)}%', style="bold green")

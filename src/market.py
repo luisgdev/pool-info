@@ -16,5 +16,4 @@ def get_price(coin, vs_currencies):
 if __name__ == '__main__':
     print('This is not main!')
     #print(get_price("pancakeswap-token", "usd,bnb"))
-    #print(get_price("mdex", "usd,bnb"))
     
