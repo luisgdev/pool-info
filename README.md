@@ -2,7 +2,7 @@
 
 This console application can show your staked and pending balances you have in a staking pool like PancakeSwap (Binance Smart Chain).
 
-I made it to query Manual Cake pool, where staked and reward token are the same which allows you to do compound interest. 
+I made it to query Manual Cake pool, where staked and reward token are the same which allows you to do [compound interest](https://github.com/luisgdev/farm-calc). 
 You can query other pools by modifying `pid`, `contract` and `contract_abi`.
 Now you can add `mainnet` to get data from any Ethereum based blockchain.
 
