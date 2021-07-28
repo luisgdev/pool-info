@@ -92,3 +92,4 @@ if __name__ == '__main__':
         print('Calculating APR...')
         apr = my_stake.calc_apr()
         Console().print(f'\nAPR = {round(apr, 2)}%', style="bold green")
+

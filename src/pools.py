@@ -1,7 +1,8 @@
 import res
 
 
-# BSC Pool Contracts here
+# Farm/Stake Pool Contracts here 
+# `mainnet` it can be for Polygon, BSC and any ERC20 based chain
 # `token_id` comes from "CoinGecko API V3"
 # `my_wallet` is the wallet I use for that pool
 # At the moment, I'm no sure what `_pid` is. Got it from BSCscan
