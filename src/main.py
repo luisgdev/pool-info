@@ -23,12 +23,11 @@ class StakePool:
 
     def _check(self):
         web3 = Web3(Web3.HTTPProvider(self.mainnet))
-        print(f'Connected to Web3: {web3.isConnected()}')
         wallet = web3.toChecksumAddress(self.my_wallet)
         pool = web3.eth.contract(self.contract, abi=self.contract_abi)
         # Call contract functions to get pool info
         staked = pool.functions.userInfo(self._pid, wallet).call()[0]
-        if self.token_name.lower() == 'cake':
+        if self.token_name == 'CAKE' or 'WINGS':
             pending = pool.functions.pendingCake(self._pid, wallet).call()
         else:
             pending = pool.functions.pending(self._pid, wallet).call()
@@ -65,12 +64,12 @@ class StakePool:
         if pairs:
             for pair in pairs.split(','):
                 rows.append(
-                    dict(
-                        name=pair.upper(),
-                        price=str(round(price[pair], 6)),
-                        staked=str(round(staked_balance * price[pair], 6)),
-                        pending=str(round(pending_balance * price[pair], 6))
-                    )
+                    {
+                        'name': pair.upper(),
+                        'price': str(round(price[pair], 6)),
+                        'staked': str(round(staked_balance * price[pair], 6)),
+                        'pending': str(round(pending_balance * price[pair], 6))
+                    }
                 )
         # Create table
         table = Table(title=self.pool_name, box=box.SIMPLE)
@@ -85,11 +84,12 @@ class StakePool:
 
 
 if __name__ == '__main__':
-    my_stake = StakePool(pools.data['cake'])
-    my_stake.print_view(pairs='usd,bnb')
-    console = Console()
-    with console.status('it will take a minute') as status:
-        print('Calculating APR...')
-        apr = my_stake.calc_apr()
-        Console().print(f'\nAPR = {round(apr, 2)}%', style="bold green")
-
+    my_pools = ['cake', 'wings']
+    for pool in my_pools:
+        my_stake = StakePool(pools.data[pool])
+        my_stake.print_view(pairs='usd,bnb')
+        console = Console()
+        with console.status('it will take a minute') as status:
+            print('Calculating APR...')
+            apr = my_stake.calc_apr()
+            Console().print(f'\nAPR = {round(apr, 2)}%', style="bold green")
