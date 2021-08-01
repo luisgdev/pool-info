@@ -2,17 +2,11 @@
 
 This console application can show your staked and pending balances you have in a staking pool like PancakeSwap (Binance Smart Chain).
 
-<<<<<<< HEAD
 I made it to query Manual Cake pool, where staked and reward token are the same which allows you to do [compound interest](https://github.com/luisgdev/farm-calc). 
 
 Create a `res.py` file to place your wallets address.
 You can query other pools by modifying `pid`, `contract` and `contract_abi` in `pools.py`.
 Now you can add `mainnet` in `pools.py` to get data from any Ethereum based blockchain like Polygon and BSC.
-=======
-I made it to query Manual Cake pool, where staked and reward token are the same which allows you to do [compound interest](https://github.com/luisgdev/farm-calc). 
-You can query other pools by modifying `pid`, `contract` and `contract_abi`.
-Now you can add `mainnet` to get data from any Ethereum based blockchain.
->>>>>>> 86de0cbac51cdab7462072c78c1398a71f78b09d
 
 Tested on:
 - [PancakeSwap Manual Cake pool](https://bscscan.com/address/0x73feaa1eE314F8c655E354234017bE2193C9E24E#code)
