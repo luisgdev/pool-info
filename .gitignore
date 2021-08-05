@@ -130,6 +130,6 @@ dmypy.json
 
 # Custom
 res.py
-mdex.py
+test.py
 # Virualenv
 poolinfo_calc/
