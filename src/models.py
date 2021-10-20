@@ -31,10 +31,10 @@ class StakePool(BaseModel):
         ct: Contract = web3.eth.contract(self.contract_, abi=self.contract_abi)
         # Call contract functions to get pool info
         staked: int = ct.functions.userInfo(self.pid_, wallet).call()[0]
-        if self.reward_token_id:
-            pending: int = ct.functions.pendingToken(self.pid_, wallet).call()
-        elif self.token_name == "XMS":
+        if self.token_name == "XMS":
             pending: int = ct.functions.pendingXMS(self.pid_, wallet).call()
+        elif self.reward_token_name == "XMS":
+            pending: int = ct.functions.pendingToken(self.pid_, wallet).call()
         elif self.token_name in ["CAKE", "WINGS"]:
             pending: int = ct.functions.pendingCake(self.pid_, wallet).call()
         else:
@@ -51,7 +51,7 @@ class StakePool(BaseModel):
         final_staked, final_pending = self._check()
         print(f'{time.strftime("%H:%M:%S")} -> {final_pending} tokens')
         # Calc yield per hour and apr%
-        yield_per_h = float(final_pending - init_pending) * (60 / t_min)
+        yield_per_h = float(final_pending - init_pending) * (59 / t_min)
         apr_p: float = (yield_per_h / float(final_staked)) * 24 * 365 * 100
         return apr_p
 
