@@ -5,7 +5,10 @@ import typer
 from models import StakePool
 import pools
 
+
 app = typer.Typer()
+
+
 @app.command()
 def main(symbol: str, apr: Optional[str] = None):
     my_pools: List[str] = symbol.split(",")
@@ -22,4 +25,3 @@ def main(symbol: str, apr: Optional[str] = None):
 
 if __name__ == "__main__":
     app()
-

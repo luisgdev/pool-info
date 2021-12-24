@@ -65,10 +65,16 @@ class StakePool(BaseModel):
         token_price: dict = market.get_price(self.token_id, pairs)
         if self.reward_token_id and self.reward_token_name:
             # ´pending´ is in reward tokens
-            header = ["Value", self.token_name, self.reward_token_name, "Staked", "Pending"]
+            header = [
+                "Value",
+                self.token_name,
+                self.reward_token_name,
+                "Staked",
+                "Pending",
+            ]
             reward_token_price: dict = market.get_price(self.reward_token_id, pairs)
-            token_vs_reward: float = token_price["usd"]/reward_token_price["usd"]
-            reward_vs_token: float = 1/token_vs_reward
+            token_vs_reward: float = token_price["usd"] / reward_token_price["usd"]
+            reward_vs_token: float = 1 / token_vs_reward
             pending: float = float(pending)
             staked: float = float(staked)
             rows.append(
@@ -91,9 +97,7 @@ class StakePool(BaseModel):
             header = ["Value", self.token_name, "Staked", "Pending"]
             rows.append(AssetValue(self.token_name, 1, None, staked, pending))
             for pair in pairs.split(","):
-                rows.append(
-                    AssetValue(pair, token_price[pair], None, staked, pending)
-                )
+                rows.append(AssetValue(pair, token_price[pair], None, staked, pending))
         # Create table
         table: Table = Table(title=self.pool_name, box=box.SIMPLE)
         for item in header:
@@ -109,8 +113,14 @@ class StakePool(BaseModel):
 
 
 class AssetValue:
-    def __init__(self, token: str, price: float, 
-                 reward: Optional[float], staked: Decimal, pending: Decimal):
+    def __init__(
+        self,
+        token: str,
+        price: float,
+        reward: Optional[float],
+        staked: Decimal,
+        pending: Decimal,
+    ):
         self.token: str = token.upper()
         self.price: str = str(round(price, 4))
         self.staked: str = str(round(float(staked) * price, 4))
@@ -124,4 +134,3 @@ class AssetValue:
 
 if __name__ == "__main__":
     print("This is not main!")
-
