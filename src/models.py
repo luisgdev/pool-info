@@ -72,16 +72,24 @@ class StakePool(BaseModel):
                 "Staked",
                 "Pending",
             ]
-            reward_token_price: dict = market.get_price(self.reward_token_id, pairs)
-            token_vs_reward: float = token_price["usd"] / reward_token_price["usd"]
+            reward_token_price: dict = market.get_price(
+                self.reward_token_id, pairs
+            )
+            token_vs_reward: float = (
+                token_price["usd"] / reward_token_price["usd"]
+            )
             reward_vs_token: float = 1 / token_vs_reward
             pending: float = float(pending)
             staked: float = float(staked)
             rows.append(
-                AssetValue(self.token_name, 1, reward_vs_token, staked, pending)
+                AssetValue(
+                    self.token_name, 1, reward_vs_token, staked, pending
+                )
             )
             rows.append(
-                AssetValue(self.reward_token_name, token_vs_reward, 1, staked, pending)
+                AssetValue(
+                    self.reward_token_name, token_vs_reward, 1, staked, pending
+                )
             )
             for pair in pairs.split(","):
                 rows.append(
@@ -97,14 +105,18 @@ class StakePool(BaseModel):
             header = ["Value", self.token_name, "Staked", "Pending"]
             rows.append(AssetValue(self.token_name, 1, None, staked, pending))
             for pair in pairs.split(","):
-                rows.append(AssetValue(pair, token_price[pair], None, staked, pending))
+                rows.append(
+                    AssetValue(pair, token_price[pair], None, staked, pending)
+                )
         # Create table
         table: Table = Table(title=self.pool_name, box=box.SIMPLE)
         for item in header:
             table.add_column(item)
         for row in rows:
             if row.reward:
-                table.add_row(row.token, row.price, row.reward, row.staked, row.pending)
+                table.add_row(
+                    row.token, row.price, row.reward, row.staked, row.pending
+                )
             else:
                 table.add_row(row.token, row.price, row.staked, row.pending)
         # Print table
